@@ -4,6 +4,7 @@ import (
 	"KCloud-Platform-Go/core"
 	"encoding/json"
 	"fmt"
+	"net/http"
 )
 
 type Post struct {
@@ -17,7 +18,10 @@ func main() {
 	var header = map[string]string{
 		"Content-Type": "application/json",
 	}
-	body, err := core.SendGetRequest("http://jsonplaceholder.typicode.com/posts", &Post{}, nil, header)
+	var param = map[string]string{
+		"id": "1",
+	}
+	body, err := core.SendRequest(http.MethodGet, "http://jsonplaceholder.typicode.com/posts", param, header)
 	if err != nil {
 		panic(err)
 	}

@@ -5,22 +5,29 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 )
 
-func SendGetRequest(url string, body any, param map[string]string, header map[string]string) ([]byte, error) {
-	marshal, _ := json.Marshal(body)
-	request, _ := http.NewRequest(http.MethodGet, url, bytes.NewReader(marshal))
+func SendRequest(method, url string, param map[string]string, header map[string]string) ([]byte, error) {
+	var request *http.Request
+	if http.MethodGet == method {
+		if param != nil {
+			var s string
+			for k, v := range param {
+				s += k + "=" + v + "&"
+			}
+			s, _ = strings.CutSuffix(s, "&")
+			url += "?" + s
+		}
+		request, _ = http.NewRequest(method, url, nil)
+	} else {
+		marshal, _ := json.Marshal(param)
+		request, _ = http.NewRequest(method, url, bytes.NewReader(marshal))
+	}
 	if header != nil {
 		for k, v := range header {
 			request.Header.Set(k, v)
 		}
-	}
-	if param != nil {
-		params := request.URL.Query()
-		for k, v := range param {
-			params.Add(k, v)
-		}
-		request.URL.RawQuery = params.Encode()
 	}
 	return sendHttpRequest(request)
 }
